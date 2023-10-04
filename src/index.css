@@ -26,6 +26,19 @@ nav > div {
   text-align: center;
 }
 
-main {
-  background-color: red;
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 25px;
+  height: 25px;
+}
+
+.blue {
+  background-color: blue;
+}
+
+.yellow {
+  background-color: yellow;
 }
