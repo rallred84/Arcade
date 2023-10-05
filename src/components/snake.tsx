@@ -1,6 +1,6 @@
 import { useOutletContext } from "react-router-dom";
 import { ContextType } from "../App";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const Snake = () => {
   const { user } = useOutletContext<ContextType>();
@@ -23,21 +23,23 @@ const Snake = () => {
     tail: SnakePart;
   };
 
-  const initialSnake: Snake = {
-    head: {
-      column: Math.ceil(columnCount / 2),
-      row: Math.ceil(rowCount / 2),
-    },
-    neck: {
-      column: Math.ceil(columnCount / 2) - 1,
-      row: Math.ceil(rowCount / 2),
-    },
-    body: [],
-    tail: {
-      column: Math.ceil(columnCount / 2) - 2,
-      row: Math.ceil(rowCount / 2),
-    },
-  };
+  const initialSnake: Snake = useMemo(() => {
+    return {
+      head: {
+        column: Math.ceil(columnCount / 2),
+        row: Math.ceil(rowCount / 2),
+      },
+      neck: {
+        column: Math.ceil(columnCount / 2) - 1,
+        row: Math.ceil(rowCount / 2),
+      },
+      body: [],
+      tail: {
+        column: Math.ceil(columnCount / 2) - 2,
+        row: Math.ceil(rowCount / 2),
+      },
+    };
+  }, [columnCount, rowCount]);
 
   const [snake, setSnake] = useState<Snake>(initialSnake);
 
@@ -60,7 +62,7 @@ const Snake = () => {
     }
 
     setSnake(initialSnake);
-  }, [rowCount, rows, columnCount, columns]);
+  }, [rowCount, rows, columnCount, columns, initialSnake]);
 
   return (
     <>
