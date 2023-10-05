@@ -4,52 +4,63 @@ import { useEffect, useState } from "react";
 
 const Snake = () => {
   const { user } = useOutletContext<ContextType>();
-  const [rows, setRows] = useState<string[]>([]);
+  const [rows, setRows] = useState<number[]>([]);
   const [rowCount, setRowCount] = useState(15);
-  const [columns, setColumns] = useState<string[]>([]);
+  const [columns, setColumns] = useState<number[]>([]);
   const [columnCount, setColumnCount] = useState(15);
 
-  type Snake = {
-    head: string;
-    body: string[];
-    tail: string;
+  type SnakePart = {
+    row: number;
+    column: number;
+    img?: string;
+    direction?: string;
   };
 
-  const [snake, setSnake] = useState<Snake>({ head: "", body: [""], tail: "" });
+  type Snake = {
+    head: SnakePart;
+    neck: SnakePart;
+    body: SnakePart[];
+    tail: SnakePart;
+  };
+
+  const initialSnake: Snake = {
+    head: {
+      column: Math.ceil(columnCount / 2),
+      row: Math.ceil(rowCount / 2),
+    },
+    neck: {
+      column: Math.ceil(columnCount / 2) - 1,
+      row: Math.ceil(rowCount / 2),
+    },
+    body: [],
+    tail: {
+      column: Math.ceil(columnCount / 2) - 2,
+      row: Math.ceil(rowCount / 2),
+    },
+  };
+
+  const [snake, setSnake] = useState<Snake>(initialSnake);
 
   useEffect(() => {
     if (rows.length !== rowCount) {
-      const rowArray: string[] = [];
+      const rowArray: number[] = [];
       for (let i = 0; i < rowCount; i++) {
-        rowArray.push(`Row ${i + 1}`);
+        rowArray.push(i + 1);
       }
       console.log(rowArray);
       setRows(rowArray);
     }
     if (columns.length !== columnCount) {
-      const columnArray: string[] = [];
+      const columnArray: number[] = [];
       for (let i = 0; i < columnCount; i++) {
-        columnArray.push(`Column ${i + 1}`);
+        columnArray.push(i + 1);
       }
       console.log(columnArray);
       setColumns(columnArray);
     }
 
-    setSnake({
-      head: `Row ${Math.ceil(rowCount / 2)},Column ${Math.ceil(
-        columnCount / 2
-      )}`,
-      body: [
-        `Row ${Math.ceil(rowCount / 2)},Column ${Math.ceil(
-          columnCount / 2 - 1
-        )}`,
-      ],
-      tail: `Row ${Math.ceil(rowCount / 2)},Column ${Math.ceil(
-        columnCount / 2 - 2
-      )}`,
-    });
-    console.log(snake);
-  }, [rowCount, rows, columnCount, columns, snake]);
+    setSnake(initialSnake);
+  }, [rowCount, rows, columnCount, columns]);
 
   return (
     <>
@@ -75,7 +86,7 @@ const Snake = () => {
             {columns.map((column, k) => (
               <div
                 key={k}
-                data-cell-id={`${row},${column}`}
+                data-row-column={`${row}-${column}`}
                 className={`cell ${
                   i % 2 === 0
                     ? k % 2 === 0
@@ -85,9 +96,12 @@ const Snake = () => {
                     ? "blue"
                     : "yellow"
                 } ${
-                  (snake.head === `${row},${column}` ||
-                    snake.body.includes(`${row},${column}`) ||
-                    snake.tail === `${row},${column}`) &&
+                  ((snake.head.row === row && snake.head.column === column) ||
+                    (snake.neck.row === row && snake.neck.column === column) ||
+                    snake.body.find(
+                      (part) => part.column === column && part.row === row
+                    ) ||
+                    (snake.tail.row === row && snake.tail.column === column)) &&
                   "red"
                 }`}
               ></div>
