@@ -1,6 +1,10 @@
 import { useOutletContext } from "react-router-dom";
 import { ContextType } from "../App";
 import { useEffect, useMemo, useState } from "react";
+import SnakeHeadImg from "../assets/images/snakehead.png";
+import SnakeBodyImg from "../assets/images/snakebody.png";
+// import SnakeTurnImg from "../assets/images/snaketurn.png";
+import SnakeTailImg from "../assets/images/snaketail.png";
 
 const Snake = () => {
   const { user } = useOutletContext<ContextType>();
@@ -23,23 +27,95 @@ const Snake = () => {
     tail: SnakePart;
   };
 
+  const displaySnake = (
+    row: number,
+    column: number
+  ): JSX.Element | undefined => {
+    let source: string | undefined;
+    if (snake.head.row === row && snake.head.column === column)
+      source = snake.head.img;
+    if (snake.neck.row === row && snake.neck.column === column)
+      source = snake.neck.img;
+    if (snake.tail.row === row && snake.tail.column === column)
+      source = snake.tail.img;
+    const bodyMatch = snake.body.find(
+      (part) => part.column === column && part.row === row
+    );
+    if (bodyMatch) source = bodyMatch.img;
+    if (source) return <img src={source} alt="" />;
+  };
+
   const initialSnake: Snake = useMemo(() => {
     return {
       head: {
         column: Math.ceil(columnCount / 2),
         row: Math.ceil(rowCount / 2),
+        img: SnakeHeadImg,
       },
       neck: {
         column: Math.ceil(columnCount / 2) - 1,
         row: Math.ceil(rowCount / 2),
+        img: SnakeBodyImg,
       },
-      body: [],
+      body: [
+        {
+          column: Math.ceil(columnCount / 2) - 2,
+          row: Math.ceil(rowCount / 2),
+          img: SnakeBodyImg,
+        },
+      ],
       tail: {
-        column: Math.ceil(columnCount / 2) - 2,
+        column: Math.ceil(columnCount / 2) - 3,
         row: Math.ceil(rowCount / 2),
+        img: SnakeTailImg,
       },
     };
   }, [columnCount, rowCount]);
+
+  const newSnake: Snake = {
+    head: {
+      column: 15,
+      row: 1,
+      img: SnakeHeadImg,
+    },
+    neck: {
+      column: 14,
+      row: 1,
+      img: SnakeBodyImg,
+    },
+    body: [
+      {
+        column: 13,
+        row: 1,
+        img: SnakeBodyImg,
+      },
+      {
+        column: 12,
+        row: 1,
+        img: SnakeBodyImg,
+      },
+      {
+        column: 11,
+        row: 1,
+        img: SnakeBodyImg,
+      },
+      {
+        column: 10,
+        row: 1,
+        img: SnakeBodyImg,
+      },
+      {
+        column: 9,
+        row: 1,
+        img: SnakeBodyImg,
+      },
+    ],
+    tail: {
+      column: 8,
+      row: 1,
+      img: SnakeTailImg,
+    },
+  };
 
   const [snake, setSnake] = useState<Snake>(initialSnake);
 
@@ -82,6 +158,8 @@ const Snake = () => {
           <option value={25}>25</option>
         </optgroup>
       </select>
+      <button onClick={() => setSnake(newSnake)}>Chang Snake</button>
+
       {rows.map((row, i) => {
         return (
           <div key={i} className="row">
@@ -97,16 +175,10 @@ const Snake = () => {
                     : k % 2 === 0
                     ? "blue"
                     : "yellow"
-                } ${
-                  ((snake.head.row === row && snake.head.column === column) ||
-                    (snake.neck.row === row && snake.neck.column === column) ||
-                    snake.body.find(
-                      (part) => part.column === column && part.row === row
-                    ) ||
-                    (snake.tail.row === row && snake.tail.column === column)) &&
-                  "red"
                 }`}
-              ></div>
+              >
+                {displaySnake(row, column)}
+              </div>
             ))}
           </div>
         );
