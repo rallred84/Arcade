@@ -37,13 +37,25 @@ img {
 }
 
 .blue {
-  background-color: blue;
+  background-color: rgba(138, 138, 242, 0.797);
 }
 
 .yellow {
-  background-color: yellow;
+  background-color: rgba(252, 252, 52, 0.925);
 }
 
 .red {
   background-color: red;
+}
+
+.up {
+  rotate: -90deg;
+}
+
+.left {
+  rotate: 180deg;
+}
+
+.down {
+  rotate: 90deg;
 }

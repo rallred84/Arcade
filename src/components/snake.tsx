@@ -3,7 +3,7 @@ import { ContextType } from "../App";
 import { useEffect, useMemo, useState } from "react";
 import SnakeHeadImg from "../assets/images/snakehead.png";
 import SnakeBodyImg from "../assets/images/snakebody.png";
-// import SnakeTurnImg from "../assets/images/snaketurn.png";
+import SnakeTurnImg from "../assets/images/snaketurn.png";
 import SnakeTailImg from "../assets/images/snaketail.png";
 
 const Snake = () => {
@@ -12,6 +12,15 @@ const Snake = () => {
   const [rowCount, setRowCount] = useState(15);
   const [columns, setColumns] = useState<number[]>([]);
   const [columnCount, setColumnCount] = useState(15);
+
+  enum SnakeDirection {
+    up = "up",
+    down = "down",
+    left = "left",
+    right = "right",
+  }
+
+  const [snakeDirection, setSnakeDirection] = useState("right");
 
   type SnakePart = {
     row: number;
@@ -27,22 +36,101 @@ const Snake = () => {
     tail: SnakePart;
   };
 
+  //Functions
   const displaySnake = (
     row: number,
     column: number
   ): JSX.Element | undefined => {
     let source: string | undefined;
-    if (snake.head.row === row && snake.head.column === column)
+    let direction: string | undefined;
+    if (snake.head.row === row && snake.head.column === column) {
       source = snake.head.img;
-    if (snake.neck.row === row && snake.neck.column === column)
+      direction = snake.head.direction;
+    }
+    if (snake.neck.row === row && snake.neck.column === column) {
       source = snake.neck.img;
-    if (snake.tail.row === row && snake.tail.column === column)
+      direction = snake.neck.direction;
+    }
+    if (snake.tail.row === row && snake.tail.column === column) {
       source = snake.tail.img;
+      direction = snake.tail.direction;
+    }
     const bodyMatch = snake.body.find(
       (part) => part.column === column && part.row === row
     );
-    if (bodyMatch) source = bodyMatch.img;
-    if (source) return <img src={source} alt="" />;
+    if (bodyMatch) {
+      source = bodyMatch.img;
+      direction = bodyMatch.direction;
+    }
+    if (source) return <img src={source} alt="" className={direction} />;
+  };
+
+  const moveSnakeOne = (snake: Snake): void => {
+    //Set New Head
+    const newHead: SnakePart = { ...snake.head };
+    newHead.direction = snakeDirection;
+    if (snakeDirection === SnakeDirection.up) newHead.row -= 1;
+    if (snakeDirection === SnakeDirection.down) newHead.row += 1;
+    if (snakeDirection === SnakeDirection.right) newHead.column += 1;
+    if (snakeDirection === SnakeDirection.left) newHead.column -= 1;
+    //Set New Neck
+    const newNeck: SnakePart = { ...snake.head };
+    if (
+      newHead.column !== snake.neck.column &&
+      newHead.row !== snake.neck.row
+    ) {
+      newNeck.img = SnakeTurnImg;
+      if (
+        (newHead.direction === SnakeDirection.up &&
+          newHead.column > snake.neck.column) ||
+        (newHead.direction === SnakeDirection.left &&
+          newHead.row > snake.neck.row)
+      )
+        newNeck.direction = SnakeDirection.up;
+      if (
+        (newHead.direction === SnakeDirection.left &&
+          newHead.row < snake.neck.row) ||
+        (newHead.direction === SnakeDirection.down &&
+          newHead.column > snake.neck.column)
+      )
+        newNeck.direction = SnakeDirection.left;
+      if (
+        (newHead.direction === SnakeDirection.down &&
+          newHead.column < snake.neck.column) ||
+        (newHead.direction === SnakeDirection.right &&
+          newHead.row < snake.neck.row)
+      )
+        newNeck.direction = SnakeDirection.down;
+      if (
+        (newHead.direction === SnakeDirection.right &&
+          newHead.row > snake.neck.row) ||
+        (newHead.direction === SnakeDirection.up &&
+          newHead.column < snake.neck.column)
+      )
+        newNeck.direction = SnakeDirection.right;
+    } else newNeck.img = SnakeBodyImg;
+
+    //Set New Body
+    const newBody: SnakePart[] = [...snake.body];
+    newBody.push({ ...snake.neck });
+    newBody.shift();
+    //Set New Tail
+    const newTail: SnakePart = { ...snake.body[0] };
+    newTail.img = SnakeTailImg;
+    if (newTail.row < newBody[0].row) newTail.direction = SnakeDirection.down;
+    if (newTail.row > newBody[0].row) newTail.direction = SnakeDirection.up;
+    if (newTail.column < newBody[0].column)
+      newTail.direction = SnakeDirection.right;
+    if (newTail.column > newBody[0].column)
+      newTail.direction = SnakeDirection.left;
+    //Set New Snake
+    const newSnake: Snake = {
+      head: newHead,
+      neck: newNeck,
+      body: newBody,
+      tail: newTail,
+    };
+    setSnake(newSnake);
   };
 
   const initialSnake: Snake = useMemo(() => {
@@ -51,73 +139,50 @@ const Snake = () => {
         column: Math.ceil(columnCount / 2),
         row: Math.ceil(rowCount / 2),
         img: SnakeHeadImg,
+        direction: "right",
       },
       neck: {
         column: Math.ceil(columnCount / 2) - 1,
         row: Math.ceil(rowCount / 2),
         img: SnakeBodyImg,
+        direction: "right",
       },
       body: [
         {
           column: Math.ceil(columnCount / 2) - 2,
           row: Math.ceil(rowCount / 2),
           img: SnakeBodyImg,
+          direction: "right",
         },
       ],
       tail: {
         column: Math.ceil(columnCount / 2) - 3,
         row: Math.ceil(rowCount / 2),
         img: SnakeTailImg,
+        direction: "right",
       },
     };
   }, [columnCount, rowCount]);
 
-  const newSnake: Snake = {
-    head: {
-      column: 15,
-      row: 1,
-      img: SnakeHeadImg,
-    },
-    neck: {
-      column: 14,
-      row: 1,
-      img: SnakeBodyImg,
-    },
-    body: [
-      {
-        column: 13,
-        row: 1,
-        img: SnakeBodyImg,
-      },
-      {
-        column: 12,
-        row: 1,
-        img: SnakeBodyImg,
-      },
-      {
-        column: 11,
-        row: 1,
-        img: SnakeBodyImg,
-      },
-      {
-        column: 10,
-        row: 1,
-        img: SnakeBodyImg,
-      },
-      {
-        column: 9,
-        row: 1,
-        img: SnakeBodyImg,
-      },
-    ],
-    tail: {
-      column: 8,
-      row: 1,
-      img: SnakeTailImg,
-    },
-  };
-
   const [snake, setSnake] = useState<Snake>(initialSnake);
+
+  //Create Event Listener for Keyboard inputs
+  useEffect(() => {
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "ArrowUp") {
+        setSnakeDirection(SnakeDirection.up);
+      }
+      if (e.code === "ArrowRight") {
+        setSnakeDirection(SnakeDirection.right);
+      }
+      if (e.code === "ArrowLeft") {
+        setSnakeDirection(SnakeDirection.left);
+      }
+      if (e.code === "ArrowDown") {
+        setSnakeDirection(SnakeDirection.down);
+      }
+    });
+  }, [SnakeDirection]);
 
   useEffect(() => {
     if (rows.length !== rowCount) {
@@ -158,7 +223,7 @@ const Snake = () => {
           <option value={25}>25</option>
         </optgroup>
       </select>
-      <button onClick={() => setSnake(newSnake)}>Chang Snake</button>
+      <button onClick={() => moveSnakeOne(snake)}>Move One Space</button>
 
       {rows.map((row, i) => {
         return (
