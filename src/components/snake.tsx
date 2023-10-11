@@ -169,16 +169,16 @@ const Snake = () => {
   //Create Event Listener for Keyboard inputs
   useEffect(() => {
     document.addEventListener("keydown", (e) => {
-      if (e.code === "ArrowUp") {
+      if (e.code === "ArrowUp" || e.code === "KeyW") {
         setSnakeDirection(SnakeDirection.up);
       }
-      if (e.code === "ArrowRight") {
+      if (e.code === "ArrowRight" || e.code === "KeyD") {
         setSnakeDirection(SnakeDirection.right);
       }
-      if (e.code === "ArrowLeft") {
+      if (e.code === "ArrowLeft" || e.code === "KeyA") {
         setSnakeDirection(SnakeDirection.left);
       }
-      if (e.code === "ArrowDown") {
+      if (e.code === "ArrowDown" || e.code === "KeyS") {
         setSnakeDirection(SnakeDirection.down);
       }
     });
